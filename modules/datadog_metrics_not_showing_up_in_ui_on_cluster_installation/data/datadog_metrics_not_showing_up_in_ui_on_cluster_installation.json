@@ -1,0 +1,122 @@
+{
+  "name": "datadog_metrics_not_showing_up_in_ui_on_cluster_installation",
+  "description": "This incident type involves an issue where Datadog metrics fail to show up in the Datadog user interface (UI) after installation on a cluster. The incident requires the software engineer to run a list of commands to debug the issue.",
+  "params": [
+    {
+      "name": "DATADOG_API_KEY",
+      "value": ""
+    },
+    {
+      "name": "DATADOG_APP_KEY",
+      "value": ""
+    },
+    {
+      "name": "DATADOG_AGENT_POD_NAME",
+      "value": ""
+    },
+    {
+      "name": "K8S_CLUSTER_NAME",
+      "value": ""
+    },
+    {
+      "name": "NAMESPACE",
+      "value": ""
+    },
+    {
+      "name": "HOST_NAME",
+      "value": ""
+    }
+  ],
+  "cells": [
+    {
+      "name": "cell_1",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Datadog Metrics Not Showing Up in UI on Cluster Installation.\nThis incident type involves an issue where Datadog metrics fail to show up in the Datadog user interface (UI) after installation on a cluster. The incident requires the software engineer to run a list of commands to debug the issue."
+    },
+    {
+      "name": "cell_2",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check that the Datadog agent is deployed and running on the cluster"
+    },
+    {
+      "name": "cell_3",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "pod | k8s_cluster_name=$K8S_CLUSTER_NAME | app='shoreline' | limit=1 | random=1 | `kubectl get pods -n datadog`"
+    },
+    {
+      "name": "cell_4",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check for any errors or issues with the Datadog agent"
+    },
+    {
+      "name": "cell_5",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "pod | k8s_cluster_name=$K8S_CLUSTER_NAME | app='shoreline' | limit=1 | random=1 | `kubectl logs ${DATADOG_AGENT_POD_NAME} -n datadog`"
+    },
+    {
+      "name": "cell_6",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Verify that the Datadog agent is collecting metrics from the cluster"
+    },
+    {
+      "name": "cell_7",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE | `agent status`"
+    },
+    {
+      "name": "cell_8",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check if the Datadog agent is forwarding metrics to the Datadog API"
+    },
+    {
+      "name": "cell_9",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE | `agent info`"
+    },
+    {
+      "name": "cell_10",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Verify that the Datadog API is receiving metrics from the Datadog agent"
+    },
+    {
+      "name": "cell_11",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `curl -X GET https://api.datadoghq.com/api/v1/validate -H \"Content-Type: application/json\" -H \"DD-API-KEY: ${DATADOG_API_KEY}\" -H \"DD-APPLICATION-KEY: ${DATADOG_APP_KEY}\"`"
+    },
+    {
+      "name": "cell_12",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check that the correct tags are applied to metrics in the Datadog UI"
+    },
+    {
+      "name": "cell_13",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "pod | k8s_cluster_name=$K8S_CLUSTER_NAME | app='shoreline' | limit=1 | random=1 | `kubectl get pods --show-labels`"
+    },
+    {
+      "name": "cell_14",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check your Datadog account plan limitations"
+    },
+    {
+      "name": "cell_15",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "host | host_name=$HOST_NAME | invoke_dd_account_plan($DATADOG_API_KEY)"
+    }
+  ]
+}
